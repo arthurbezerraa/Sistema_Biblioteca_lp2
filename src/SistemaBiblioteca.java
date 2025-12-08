@@ -4,15 +4,21 @@ import java.util.List;
 import java.util.Scanner;
 
 import controller.GerenciadorAutores;
+import controller.GerenciadorAvaliacoes;
 import controller.GerenciadorCategorias;
+import controller.GerenciadorEditoras;
 import controller.GerenciadorEmprestimos;
 import controller.GerenciadorLivros;
+import controller.GerenciadorPreferencias;
 import controller.GerenciadorReservas;
 import controller.GerenciadorUsuarios;
 import enums.StatusEmprestimo;
+import enums.TemaInterface;
 import exception.UsuarioNaoEncontradoException;
 import model.Autor;
+import model.Avaliacao;
 import model.Categoria;
+import model.Editora;
 import model.Emprestimo;
 import model.Estudante;
 import model.Livro;
@@ -27,6 +33,9 @@ public class SistemaBiblioteca {
     private GerenciadorReservas gerenciadorReservas;
     private GerenciadorAutores gerenciadorAutores;
     private GerenciadorCategorias gerenciadorCategorias;
+    private GerenciadorEditoras gerenciadorEditoras;
+    private GerenciadorAvaliacoes gerenciadorAvaliacoes;
+    private GerenciadorPreferencias gerenciadorPreferencias;
     private Scanner scanner;
 
     public SistemaBiblioteca() {
@@ -36,15 +45,24 @@ public class SistemaBiblioteca {
         this.gerenciadorReservas = new GerenciadorReservas();
         this.gerenciadorAutores = new GerenciadorAutores();
         this.gerenciadorCategorias = new GerenciadorCategorias();
+        this.gerenciadorEditoras = new GerenciadorEditoras();
+        this.gerenciadorAvaliacoes = new GerenciadorAvaliacoes();
+        this.gerenciadorPreferencias = new GerenciadorPreferencias();
         this.scanner = new Scanner(System.in);
 
+        exibirBoasVindas();
         inicializarDadosExemplo();
     }
 
+    private void exibirBoasVindas() {
+        System.out.println("\n=== SISTEMA DE GESTÃO DE BIBLIOTECA DIGITAL ===");
+        System.out.println("Carregando preferências do usuário...");
+        System.out.println(gerenciadorPreferencias.exibirPreferencias());
+        System.out.println("Bem-vindo, " + gerenciadorPreferencias.getPreferencias().getNomeExibicao() + "!");
+        System.out.println("Tema atual: " + gerenciadorPreferencias.getPreferencias().getTema().getNome());
+    }
+    
     public void executar() {
-        System.out.println("=== SISTEMA DE GESTÃO DE BIBLIOTECA DIGITAL ===");
-        System.out.println("Bem-vindo ao sistema de biblioteca!");
-        
         int opcao;
         do {
             exibirMenu();
@@ -52,7 +70,8 @@ public class SistemaBiblioteca {
             processarOpcao(opcao);
         } while (opcao != 0);
         
-        System.out.println("Obrigado por usar o Sistema de Biblioteca Digital!");
+        System.out.println("\nObrigado por usar o Sistema de Biblioteca Digital!");
+        System.out.println("Até logo, " + gerenciadorPreferencias.getPreferencias().getNomeExibicao() + "!");
         scanner.close();
     }
 
@@ -64,7 +83,10 @@ public class SistemaBiblioteca {
         System.out.println("4. Gerenciar Reservas");
         System.out.println("5. Gerenciar Autores");
         System.out.println("6. Gerenciar Categorias");
-        System.out.println("7. Relatórios");
+        System.out.println("7. Gerenciar Editoras");
+        System.out.println("8. Gerenciar Avaliações");
+        System.out.println("9. Relatórios");
+        System.out.println("10. Configurações");
         System.out.println("0. Sair");
         System.out.print("Escolha uma opção: ");
     }
@@ -98,7 +120,16 @@ public class SistemaBiblioteca {
                 gerenciarCategorias();
                 break;
             case 7:
+                gerenciarEditoras();
+                break;
+            case 8:
+                gerenciarAvaliacoes();
+                break;
+            case 9:
                 exibirRelatorios();
+                break;
+            case 10:
+                configuracoes();
                 break;
             case 0:
                 System.out.println("Encerrando sistema...");
@@ -256,6 +287,8 @@ public class SistemaBiblioteca {
         System.out.println("2. Buscar Livro");
         System.out.println("3. Listar Livros");
         System.out.println("4. Listar Livros Disponíveis");
+        System.out.println("5. Atualizar Livro");
+        System.out.println("6. Remover Livro");
         System.out.println("0. Voltar");
         System.out.print("Escolha uma opção: ");
         
@@ -272,6 +305,12 @@ public class SistemaBiblioteca {
                 break;
             case 4:
                 listarLivrosDisponiveis();
+                break;
+            case 5:
+                atualizarLivro();
+                break;
+            case 6:
+                removerLivro();
                 break;
         }
     }
@@ -344,6 +383,51 @@ public class SistemaBiblioteca {
         System.out.println("\n=== LIVROS DISPONÍVEIS ===");
         for (Livro livro : gerenciadorLivros.listarLivrosDisponiveis()) {
             System.out.println("- " + livro);
+        }
+    }
+
+    private void atualizarLivro() {
+        System.out.print("Digite o ISBN do livro a ser atualizado: ");
+        String isbn = scanner.nextLine();
+        
+        Livro livro = gerenciadorLivros.buscarPorIsbn(isbn);
+        if (livro == null) {
+            System.out.println("Livro não encontrado!");
+            return;
+        }
+        
+        try {
+            System.out.println("Livro atual: " + livro);
+            System.out.print("Novo título (deixe vazio para manter): ");
+            String novoTitulo = scanner.nextLine();
+            if (!novoTitulo.trim().isEmpty()) {
+                livro.setTitulo(novoTitulo);
+            }
+            
+            System.out.print("Novo ano de publicação (deixe vazio para manter): ");
+            String novoAnoStr = scanner.nextLine();
+            if (!novoAnoStr.trim().isEmpty()) {
+                int novoAno = Integer.parseInt(novoAnoStr);
+                livro.setAnoPublicacao(novoAno);
+            }
+            
+            gerenciadorLivros.atualizarLivro(livro);
+            System.out.println("Livro atualizado com sucesso!");
+            
+        } catch (Exception e) {
+            System.out.println("Erro ao atualizar livro: " + e.getMessage());
+        }
+    }
+
+    private void removerLivro() {
+        System.out.print("Digite o ISBN do livro a ser removido: ");
+        String isbn = scanner.nextLine();
+        
+        try {
+            gerenciadorLivros.removerLivro(isbn);
+            System.out.println("Livro removido com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro ao remover livro: " + e.getMessage());
         }
     }
 
@@ -617,6 +701,331 @@ public class SistemaBiblioteca {
         }
     }
 
+    private void gerenciarEditoras() {
+        System.out.println("\n=== GERENCIAR EDITORAS ===");
+        System.out.println("1. Cadastrar Editora");
+        System.out.println("2. Buscar Editora");
+        System.out.println("3. Listar Editoras");
+        System.out.println("4. Atualizar Editora");
+        System.out.println("5. Remover Editora");
+        System.out.println("0. Voltar");
+        System.out.print("Escolha uma opção: ");
+        
+        int opcao = lerOpcao();
+        switch (opcao) {
+            case 1:
+                cadastrarEditora();
+                break;
+            case 2:
+                buscarEditora();
+                break;
+            case 3:
+                listarEditoras();
+                break;
+            case 4:
+                atualizarEditora();
+                break;
+            case 5:
+                removerEditora();
+                break;
+        }
+    }
+
+    private void cadastrarEditora() {
+        try {
+            System.out.print("Nome: ");
+            String nome = scanner.nextLine();
+            System.out.print("CNPJ: ");
+            String cnpj = scanner.nextLine();
+            System.out.print("Endereço: ");
+            String endereco = scanner.nextLine();
+            System.out.print("Telefone: ");
+            String telefone = scanner.nextLine();
+            
+            Editora editora = new Editora(nome, cnpj, endereco, telefone);
+            gerenciadorEditoras.adicionarEditora(editora);
+            System.out.println("Editora cadastrada com sucesso!");
+            
+        } catch (Exception e) {
+            System.out.println("Erro ao cadastrar editora: " + e.getMessage());
+        }
+    }
+
+    private void buscarEditora() {
+        System.out.print("Digite o CNPJ da editora: ");
+        String cnpj = scanner.nextLine();
+        
+        try {
+            Editora editora = gerenciadorEditoras.buscarPorCnpj(cnpj);
+            System.out.println("Editora encontrada:");
+            System.out.println(editora);
+            System.out.println("Endereço: " + editora.getEndereco());
+            System.out.println("Telefone: " + editora.getTelefone());
+        } catch (Exception e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
+    }
+
+    private void listarEditoras() {
+        System.out.println("\n=== LISTA DE EDITORAS ===");
+        System.out.println("Total de editoras: " + gerenciadorEditoras.contarTotal());
+        
+        for (Editora editora : gerenciadorEditoras.listarEditoras()) {
+            System.out.println("- " + editora);
+        }
+    }
+
+    private void atualizarEditora() {
+        System.out.print("Digite o CNPJ da editora a ser atualizada: ");
+        String cnpj = scanner.nextLine();
+        
+        try {
+            System.out.print("Novo nome (deixe vazio para manter): ");
+            String nome = scanner.nextLine();
+            System.out.print("Novo endereço (deixe vazio para manter): ");
+            String endereco = scanner.nextLine();
+            System.out.print("Novo telefone (deixe vazio para manter): ");
+            String telefone = scanner.nextLine();
+            
+            gerenciadorEditoras.atualizarEditora(cnpj, nome, endereco, telefone);
+            System.out.println("Editora atualizada com sucesso!");
+            
+        } catch (Exception e) {
+            System.out.println("Erro ao atualizar editora: " + e.getMessage());
+        }
+    }
+
+    private void removerEditora() {
+        System.out.print("Digite o CNPJ da editora a ser removida: ");
+        String cnpj = scanner.nextLine();
+        
+        try {
+            gerenciadorEditoras.removerEditora(cnpj);
+            System.out.println("Editora removida com sucesso!");
+        } catch (Exception e) {
+            System.out.println("Erro: " + e.getMessage());
+        }
+    }
+
+    private void gerenciarAvaliacoes() {
+        System.out.println("\n=== GERENCIAR AVALIAÇÕES ===");
+        System.out.println("1. Adicionar Avaliação");
+        System.out.println("2. Buscar Avaliações por Livro");
+        System.out.println("3. Listar Todas as Avaliações");
+        System.out.println("4. Ver Média de um Livro");
+        System.out.println("5. Remover Avaliação");
+        System.out.println("0. Voltar");
+        System.out.print("Escolha uma opção: ");
+        
+        int opcao = lerOpcao();
+        switch (opcao) {
+            case 1:
+                adicionarAvaliacao();
+                break;
+            case 2:
+                buscarAvaliacoesPorLivro();
+                break;
+            case 3:
+                listarAvaliacoes();
+                break;
+            case 4:
+                verMediaLivro();
+                break;
+            case 5:
+                removerAvaliacao();
+                break;
+        }
+    }
+
+    private void adicionarAvaliacao() {
+        try {
+            System.out.print("CPF do usuário: ");
+            String cpf = scanner.nextLine();
+            Usuario usuario = gerenciadorUsuarios.buscarPorCpf(cpf);
+            if (usuario == null) {
+                System.out.println("Usuário não encontrado!");
+                return;
+            }
+            
+            System.out.print("ISBN do livro: ");
+            String isbn = scanner.nextLine();
+            Livro livro = gerenciadorLivros.buscarPorIsbn(isbn);
+            if (livro == null) {
+                System.out.println("Livro não encontrado!");
+                return;
+            }
+            
+            System.out.print("Nota (1-5): ");
+            int nota = Integer.parseInt(scanner.nextLine());
+            
+            System.out.print("Comentário (mínimo 10 caracteres): ");
+            String comentario = scanner.nextLine();
+            
+            Avaliacao avaliacao = new Avaliacao(usuario, livro, nota, comentario, LocalDate.now());
+            gerenciadorAvaliacoes.adicionarAvaliacao(avaliacao);
+            System.out.println("Avaliação adicionada com sucesso!");
+            
+        } catch (Exception e) {
+            System.out.println("Erro ao adicionar avaliação: " + e.getMessage());
+        }
+    }
+
+    private void buscarAvaliacoesPorLivro() {
+        System.out.print("Digite o ISBN do livro: ");
+        String isbn = scanner.nextLine();
+        
+        Livro livro = gerenciadorLivros.buscarPorIsbn(isbn);
+        if (livro == null) {
+            System.out.println("Livro não encontrado!");
+            return;
+        }
+        
+        List<Avaliacao> avaliacoes = gerenciadorAvaliacoes.buscarPorLivro(livro);
+        if (avaliacoes.isEmpty()) {
+            System.out.println("Nenhuma avaliação encontrada para este livro.");
+        } else {
+            System.out.println("\n=== AVALIAÇÕES DE: " + livro.getTitulo() + " ===");
+            double media = gerenciadorAvaliacoes.calcularMediaLivro(livro);
+            System.out.println("Média: " + String.format("%.2f", media) + " estrelas");
+            System.out.println();
+            for (Avaliacao avaliacao : avaliacoes) {
+                System.out.println(avaliacao);
+                System.out.println("---");
+            }
+        }
+    }
+
+    private void listarAvaliacoes() {
+        System.out.println("\n=== LISTA DE AVALIAÇÕES ===");
+        System.out.println("Total de avaliações: " + gerenciadorAvaliacoes.contarTotal());
+        
+        for (Avaliacao avaliacao : gerenciadorAvaliacoes.listarAvaliacoes()) {
+            System.out.println("- " + avaliacao);
+        }
+    }
+
+    private void verMediaLivro() {
+        System.out.print("Digite o ISBN do livro: ");
+        String isbn = scanner.nextLine();
+        
+        Livro livro = gerenciadorLivros.buscarPorIsbn(isbn);
+        if (livro == null) {
+            System.out.println("Livro não encontrado!");
+            return;
+        }
+        
+        double media = gerenciadorAvaliacoes.calcularMediaLivro(livro);
+        System.out.println("Média de avaliações do livro '" + livro.getTitulo() + "': " + 
+                          String.format("%.2f", media) + " estrelas");
+    }
+
+    private void removerAvaliacao() {
+        try {
+            System.out.print("CPF do usuário: ");
+            String cpf = scanner.nextLine();
+            Usuario usuario = gerenciadorUsuarios.buscarPorCpf(cpf);
+            if (usuario == null) {
+                System.out.println("Usuário não encontrado!");
+                return;
+            }
+            
+            System.out.print("ISBN do livro: ");
+            String isbn = scanner.nextLine();
+            Livro livro = gerenciadorLivros.buscarPorIsbn(isbn);
+            if (livro == null) {
+                System.out.println("Livro não encontrado!");
+                return;
+            }
+            
+            gerenciadorAvaliacoes.removerAvaliacao(usuario, livro);
+            System.out.println("Avaliação removida com sucesso!");
+            
+        } catch (Exception e) {
+            System.out.println("Erro ao remover avaliação: " + e.getMessage());
+        }
+    }
+
+    private void configuracoes() {
+        System.out.println("\n=== CONFIGURAÇÕES DO SISTEMA ===");
+        System.out.println("1. Alterar Nome de Exibição");
+        System.out.println("2. Alterar Tema");
+        System.out.println("3. Visualizar Preferências");
+        System.out.println("4. Resetar Preferências");
+        System.out.println("0. Voltar");
+        System.out.print("Escolha uma opção: ");
+        
+        int opcao = lerOpcao();
+        switch (opcao) {
+            case 1:
+                alterarNomeExibicao();
+                break;
+            case 2:
+                alterarTema();
+                break;
+            case 3:
+                visualizarPreferencias();
+                break;
+            case 4:
+                resetarPreferencias();
+                break;
+        }
+    }
+
+    private void alterarNomeExibicao() {
+        System.out.print("Digite o novo nome de exibição: ");
+        String novoNome = scanner.nextLine();
+        
+        try {
+            gerenciadorPreferencias.atualizarNomeExibicao(novoNome);
+            System.out.println("Nome de exibição atualizado com sucesso!");
+            System.out.println("Novo nome: " + novoNome);
+        } catch (Exception e) {
+            System.out.println("Erro ao atualizar nome: " + e.getMessage());
+        }
+    }
+
+    private void alterarTema() {
+        System.out.println("\n=== ALTERAR TEMA ===");
+        System.out.println("1. Tema Claro");
+        System.out.println("2. Tema Escuro");
+        System.out.print("Escolha uma opção: ");
+        
+        int opcao = lerOpcao();
+        TemaInterface novoTema = null;
+        
+        switch (opcao) {
+            case 1:
+                novoTema = TemaInterface.CLARO;
+                break;
+            case 2:
+                novoTema = TemaInterface.ESCURO;
+                break;
+            default:
+                System.out.println("Opção inválida!");
+                return;
+        }
+        
+        gerenciadorPreferencias.atualizarTema(novoTema);
+        System.out.println("Tema atualizado para: " + novoTema.getNome());
+    }
+
+    private void visualizarPreferencias() {
+        System.out.println(gerenciadorPreferencias.exibirPreferencias());
+    }
+
+    private void resetarPreferencias() {
+        System.out.print("Tem certeza que deseja resetar as preferências? (S/N): ");
+        String confirmacao = scanner.nextLine();
+        
+        if (confirmacao.equalsIgnoreCase("S") || confirmacao.equalsIgnoreCase("SIM")) {
+            gerenciadorPreferencias.resetarPreferencias();
+            System.out.println("Preferências resetadas com sucesso!");
+            System.out.println(gerenciadorPreferencias.exibirPreferencias());
+        } else {
+            System.out.println("Operação cancelada.");
+        }
+    }
+
     private void exibirRelatorios() {
         System.out.println("\n=== RELATÓRIOS DO SISTEMA ===");
         System.out.println("Usuários cadastrados: " + gerenciadorUsuarios.getQuantidadeUsuarios());
@@ -629,11 +1038,13 @@ public class SistemaBiblioteca {
         System.out.println("Reservas realizadas: " + gerenciadorReservas.getQuantidadeReservas());
         System.out.println("Autores cadastrados: " + gerenciadorAutores.getQuantidadeAutores());
         System.out.println("Categorias cadastradas: " + gerenciadorCategorias.getQuantidadeCategorias());
+        System.out.println("Editoras cadastradas: " + gerenciadorEditoras.contarTotal());
+        System.out.println("Avaliações registradas: " + gerenciadorAvaliacoes.contarTotal());
     }
 
     private void inicializarDadosExemplo() {
         try {
-
+            
             Categoria categoria1 = new Categoria("Ficção", "Livros de ficção científica e fantasia");
             Categoria categoria2 = new Categoria("Técnico", "Livros técnicos e acadêmicos");
             gerenciadorCategorias.adicionarCategoria(categoria1);
@@ -644,6 +1055,11 @@ public class SistemaBiblioteca {
             gerenciadorAutores.adicionarAutor(autor1);
             gerenciadorAutores.adicionarAutor(autor2);
 
+            Editora editora1 = new Editora("Companhia das Letras", "60500139000174", "Rua Bandeira Paulista, 702", "(11) 3707-3500");
+            Editora editora2 = new Editora("Editora Aleph", "09313766000181", "Rua Dr. Luiz Migliano, 1110", "(11) 3039-6000");
+            gerenciadorEditoras.adicionarEditora(editora1);
+            gerenciadorEditoras.adicionarEditora(editora2);
+
             Livro livro1 = new Livro("978-85-359-0277-5", "Capitães da Areia", autor1, categoria1, 1937);
             Livro livro2 = new Livro("978-85-359-0278-2", "Fundação", autor2, categoria1, 1951);
             gerenciadorLivros.adicionarLivro(livro1);
@@ -653,6 +1069,11 @@ public class SistemaBiblioteca {
             Professor professor1 = new Professor("Maria Santos", "maria@email.com", "12345678909", "Informática", "Doutora");
             gerenciadorUsuarios.adicionarUsuario(estudante1);
             gerenciadorUsuarios.adicionarUsuario(professor1);
+
+            Avaliacao avaliacao1 = new Avaliacao(estudante1, livro1, 5, "Excelente livro! Uma obra-prima da literatura brasileira.", LocalDate.now().minusDays(5));
+            Avaliacao avaliacao2 = new Avaliacao(professor1, livro2, 4, "Ótimo livro de ficção científica, recomendo para todos.", LocalDate.now().minusDays(2));
+            gerenciadorAvaliacoes.adicionarAvaliacao(avaliacao1);
+            gerenciadorAvaliacoes.adicionarAvaliacao(avaliacao2);
             
         } catch (Exception e) {
             System.out.println("Erro ao inicializar dados de exemplo: " + e.getMessage());
