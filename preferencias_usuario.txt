@@ -1,0 +1,9 @@
+# Preferências do Sistema de Biblioteca
+# Este arquivo armazena as configurações do usuário
+# Gerado automaticamente - NÃO edite manualmente
+
+# Nome de exibição do usuário
+nomeExibicao=Usuário
+
+# Tema da interface (CLARO ou ESCURO)
+tema=CLARO
