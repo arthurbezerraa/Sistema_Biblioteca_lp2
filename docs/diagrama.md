@@ -11,6 +11,11 @@ classDiagram
         #String cpf
         +getTipoUsuario()* String
         +getInformacoesEspecificas()* String
+        +getNome()
+        +setNome()
+        +getEmail()
+        +setEmail()
+        +getCpf()
     }
     
     class Estudante {
@@ -18,6 +23,10 @@ classDiagram
         -String curso
         +getTipoUsuario() String
         +getInformacoesEspecificas() String
+        +getMatricula()
+        +setMatricula()
+        +getCurso()
+        +setCurso()
     }
     
     class Professor {
@@ -25,6 +34,10 @@ classDiagram
         -String titulacao
         +getTipoUsuario() String
         +getInformacoesEspecificas() String
+        +getDepartamento()
+        +setDepartamento()
+        +getTitulacao()
+        +setTitulacao()
     }
     
     class Livro {
@@ -34,6 +47,16 @@ classDiagram
         -Categoria categoria
         -boolean disponivel
         -int anoPublicacao
+        +getIsbn()
+        +getTitulo()
+        +setTitulo()
+        +getAutor()
+        +setAutor()
+        +getCategoria()
+        +setCategoria()
+        +isDisponivel()
+        +getAnoPublicacao()
+        +setAnoPublicacao()
         +emprestar()
         +devolver()
     }
@@ -42,11 +65,22 @@ classDiagram
         -String nome
         -String nacionalidade
         -LocalDate dataNascimento
+        +getNome()
+        +setNome()
+        +getNacionalidade()
+        +setNacionalidade()
+        +getDataNascimento()
+        +getDataNascimentoFormatada()
+        +setDataNascimento()
     }
     
     class Categoria {
         -String nome
         -String descricao
+        +getNome()
+        +setNome()
+        +getDescricao()
+        +setDescricao()
     }
     
     class OperacaoBiblioteca {
@@ -58,6 +92,13 @@ classDiagram
         +getStatusOperacao()* String
         +podeFinalizar()* boolean
         +finalizarOperacao()* void
+        +getUsuario()
+        +setUsuario()
+        +getLivro()
+        +setLivro()
+        +getDataOperacao()
+        +setDataOperacao()
+        +getDataOperacaoFormatada()
     }
     
     class Emprestimo {
@@ -69,8 +110,20 @@ classDiagram
         +getStatusOperacao() String
         +podeFinalizar() boolean
         +finalizarOperacao() void
+        +getDataEmprestimo()
+        +getDataEmprestimoFormatada()
+        +setDataEmprestimo()
+        +getDataDevolucao()
+        +getDataDevolucaoFormatada()
+        +setDataDevolucao()
+        +getDataLimite()
+        +getDataLimiteFormatada()
+        +setDataLimite()
+        +getStatus()
+        +setStatus()
         +devolverLivro()
         +isAtrasado() boolean
+        +atualizarStatus() void
     }
     
     class Reserva {
@@ -80,8 +133,14 @@ classDiagram
         +getStatusOperacao() String
         +podeFinalizar() boolean
         +finalizarOperacao() void
+        +getDataReserva()
+        +getDataReservaFormatada()
+        +setDataReserva()
+        +getStatus()
+        +setStatus()
         +cancelar()
         +concluir()
+        +isAtiva() boolean
     }
     
     class StatusEmprestimo {
@@ -90,6 +149,7 @@ classDiagram
         DEVOLVIDO
         ATRASADO
         +podeTransitarPara() boolean
+        +getDescricao() String
     }
     
     class StatusReserva {
@@ -98,46 +158,204 @@ classDiagram
         CANCELADA
         CONCLUIDA
         +podeTransitarPara() boolean
+        +getDescricao() String
     }
     
     class GerenciadorUsuarios {
         -List~Usuario~ usuarios
         +adicionarUsuario()
         +buscarPorCpf()
+        +buscarPorNome()
         +listarUsuarios()
+        +listarEstudantes()
+        +listarProfessores()
+        +atualizarUsuario()
         +removerUsuario()
+        +temUsuarios()
+        +getQuantidadeUsuarios()
+        +getQuantidadeEstudantes()
+        +getQuantidadeProfessores()
     }
     
     class GerenciadorLivros {
         -List~Livro~ livros
         +adicionarLivro()
         +buscarPorIsbn()
+        +buscarPorTitulo()
+        +buscarPorAutor()
+        +buscarPorCategoria()
         +listarLivros()
+        +listarLivrosDisponiveis()
+        +listarLivrosIndisponiveis()
+        +atualizarLivro()
+        +removerLivro()
+        +temLivros()
+        +getQuantidadeLivros()
+        +getQuantidadeLivrosDisponiveis()
+        +getQuantidadeLivrosIndisponiveis()
     }
     
     class GerenciadorEmprestimos {
         -List~Emprestimo~ emprestimos
         +realizarEmprestimo()
-        +devolverLivro()
+        +buscarPorUsuario()
+        +buscarPorLivro()
         +listarEmprestimos()
+        +listarEmprestimosAtivos()
+        +devolverLivro()
+        +removerEmprestimo()
+        +getQuantidadeEmprestimos()
     }
     
     class GerenciadorReservas {
         -List~Reserva~ reservas
         +fazerReserva()
+        +buscarPorUsuario()
+        +buscarPorLivro()
         +listarReservas()
+        +listarReservasAtivas()
+        +atualizarStatus()
+        +removerReserva()
+        +getQuantidadeReservas()
     }
     
     class GerenciadorAutores {
         -List~Autor~ autores
         +adicionarAutor()
+        +buscarPorNome()
         +listarAutores()
+        +atualizarAutor()
+        +removerAutor()
+        +getQuantidadeAutores()
     }
     
     class GerenciadorCategorias {
         -List~Categoria~ categorias
         +adicionarCategoria()
+        +buscarPorNome()
         +listarCategorias()
+        +atualizarCategoria()
+        +removerCategoria()
+        +getQuantidadeCategorias()
+    }
+    
+    class Editora {
+        -String nome
+        -String cnpj
+        -String endereco
+        -String telefone
+        +getNome()
+        +setNome()
+        +getCnpj()
+        +getCnpjFormatado()
+        +getEndereco()
+        +setEndereco()
+        +getTelefone()
+        +setTelefone()
+    }
+    
+    class Avaliacao {
+        -Usuario usuario
+        -Livro livro
+        -int nota
+        -String comentario
+        -LocalDate dataAvaliacao
+        +getUsuario()
+        +setUsuario()
+        +getLivro()
+        +setLivro()
+        +getNota()
+        +setNota()
+        +getComentario()
+        +setComentario()
+        +getDataAvaliacao()
+        +getDataAvaliacaoFormatada()
+        +getNotaEstrelas()
+    }
+    
+    class PreferenciasUsuario {
+        -String nomeExibicao
+        -TemaInterface tema
+        +getNomeExibicao()
+        +setNomeExibicao()
+        +getTema()
+        +setTema()
+        +alternarTema()
+    }
+    
+    class GerenciadorEditoras {
+        -List~Editora~ editoras
+        +adicionarEditora()
+        +buscarPorCnpj()
+        +buscarPorNome()
+        +listarEditoras()
+        +atualizarEditora()
+        +removerEditora()
+        +buscar()
+        +listarTodos()
+        +existe()
+        +contarTotal()
+        +gerarRelatorio()
+        +gerarEstatisticas()
+        +exportarDados()
+    }
+    
+    class GerenciadorAvaliacoes {
+        -List~Avaliacao~ avaliacoes
+        +adicionarAvaliacao()
+        +buscarPorUsuario()
+        +buscarPorLivro()
+        +buscarPorNota()
+        +listarAvaliacoes()
+        +atualizarAvaliacao()
+        +removerAvaliacao()
+        +calcularMediaLivro()
+        +buscar()
+        +listarTodos()
+        +existe()
+        +contarTotal()
+        +gerarRelatorio()
+        +gerarEstatisticas()
+        +exportarDados()
+    }
+    
+    class GerenciadorPreferencias {
+        -PreferenciasUsuario preferencias
+        +carregarPreferencias()
+        +salvarPreferencias()
+        +getPreferencias()
+        +atualizarNomeExibicao()
+        +atualizarTema()
+        +alternarTema()
+        +resetarPreferencias()
+        +exibirPreferencias()
+    }
+    
+    class TemaInterface {
+        <<enumeration>>
+        CLARO
+        ESCURO
+        +getNome()
+        +getCodigoCor()
+        +getCorTexto()
+        +aplicarTema()
+        +alternar()
+        +fromString()
+    }
+    
+    class Pesquisavel {
+        <<interface>>
+        +buscar()* List
+        +listarTodos()* List
+        +existe()* boolean
+        +contarTotal()* int
+    }
+    
+    class Relatorivel {
+        <<interface>>
+        +gerarRelatorio()* String
+        +gerarEstatisticas()* String
+        +exportarDados()* String
     }
     
     Usuario <|-- Estudante
@@ -150,12 +368,22 @@ classDiagram
     OperacaoBiblioteca --> Livro
     Emprestimo --> StatusEmprestimo
     Reserva --> StatusReserva
+    Avaliacao --> Usuario
+    Avaliacao --> Livro
+    PreferenciasUsuario --> TemaInterface
     GerenciadorUsuarios --> Usuario
     GerenciadorLivros --> Livro
     GerenciadorEmprestimos --> Emprestimo
     GerenciadorReservas --> Reserva
     GerenciadorAutores --> Autor
     GerenciadorCategorias --> Categoria
+    GerenciadorEditoras --> Editora
+    GerenciadorAvaliacoes --> Avaliacao
+    GerenciadorPreferencias --> PreferenciasUsuario
+    GerenciadorEditoras ..|> Pesquisavel
+    GerenciadorEditoras ..|> Relatorivel
+    GerenciadorAvaliacoes ..|> Pesquisavel
+    GerenciadorAvaliacoes ..|> Relatorivel
 ```
 
 ## Legenda
@@ -166,6 +394,10 @@ classDiagram
 - **Polimorfismo 2:** `getTipoOperacao()`, `getStatusOperacao()`, `podeFinalizar()` e `finalizarOperacao()` em `Emprestimo` e `Reserva`
 - **Composição:** `Livro` contém `Autor` e `Categoria`
 - **Associação:** `OperacaoBiblioteca` (e suas subclasses) associam `Usuario` e `Livro`
-- **Enum:** `StatusEmprestimo` e `StatusReserva` definem estados
-- **Controller:** Gerenciadores implementam operações CRUD
+- **Associação:** `Avaliacao` associa `Usuario` e `Livro`
+- **Associação:** `PreferenciasUsuario` associa `TemaInterface`
+- **Enum:** `StatusEmprestimo`, `StatusReserva` e `TemaInterface` definem estados/valores
+- **Interface:** `Pesquisavel` e `Relatorivel` definem contratos para funcionalidades de busca e relatórios
+- **Implementação:** `GerenciadorEditoras` e `GerenciadorAvaliacoes` implementam `Pesquisavel` e `Relatorivel`
+- **Controller:** Gerenciadores implementam operações CRUD e gerenciamento de entidades
 
